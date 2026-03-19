@@ -1,0 +1,7 @@
+{
+  "name": "BeeBot AI",
+  "description": "A modern, aesthetic AI chat interface replicating the BeeBot design with functional Gemini integration.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

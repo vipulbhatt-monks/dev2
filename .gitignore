@@ -1,0 +1,87 @@
+# -----------------------------
+# Node / Vite / React / TS
+# -----------------------------
+node_modules/
+dist/
+dist-ssr/
+build/
+.out/
+.vite/
+.eslintcache
+*.tsbuildinfo
+
+# -----------------------------
+# Logs
+# -----------------------------
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# -----------------------------
+# Testing / coverage
+# -----------------------------
+coverage/
+.nyc_output/
+
+# -----------------------------
+# Env files (secrets)
+# -----------------------------
+.env
+.env.*
+!.env.example
+
+# If you keep env files under subfolders (you do: monks/.env)
+**/.env
+**/.env.*
+
+# -----------------------------
+# Vercel
+# -----------------------------
+.vercel/
+
+# -----------------------------
+# IDEs / editors
+# -----------------------------
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+.idea/
+*.iml
+
+# -----------------------------
+# OS junk
+# -----------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# -----------------------------
+# Optional caches
+# -----------------------------
+.cache/
+tmp/
+temp/
+
+# -----------------------------
+# Python
+# -----------------------------
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# -----------------------------
+# Safety: nested git dirs (you have monks/.git/)
+# -----------------------------
+**/.git/
+
+package-lock.json
+**/.git/
+
+env
