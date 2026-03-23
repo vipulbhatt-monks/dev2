@@ -29,6 +29,8 @@ from agents.srs_agent import _get_store
 from models.requirement_models import GenerateProjectRequest, ChatRequest
 from services.adk_session import APP_NAME, ensure_session, get_runner
 from services.ai_service import generate_text
+from services.chat_service import initialize_session, persist_message, load_history
+from models.requirement_models import GenerateProjectRequest, ChatRequest, MessagePart
 
 router = APIRouter()
 from google.genai._api_client import BaseApiClient
@@ -150,8 +152,44 @@ async def agent_chat(request: ChatRequest):
     session_id = request.session_id or "default-agent"
     user_id = "user"
 
+    # Initialize DB session
+    try:
+        await initialize_session(session_id, "agent")
+    except Exception as e:
+        print(f"[ChatService] Could not initialize session: {e}")
+
+    message_text = request.message or ""
+
+    # No message = history restore request
+    if not message_text and not request.tool_responses:
+        try:
+            messages = await load_history(session_id)
+            async def stream_history():
+                for msg in messages:
+                    text_content = ""
+                    for part in msg["content"]:
+                        if part.get("text"):
+                            text_content += part["text"]
+                    if text_content:
+                        payload = {
+                            "text": text_content,
+                            "role": msg["role"]
+                        }
+                        yield json.dumps(payload) + "\n"
+            return StreamingResponse(stream_history(), media_type="application/x-ndjson")
+        except Exception as e:
+            print(f"[ChatService] Could not load history: {e}")
+            return StreamingResponse(iter([]), media_type="application/x-ndjson")
+
     await ensure_session(session_id, user_id)
     runner = get_runner()
+
+    # Save user message
+    if message_text:
+        try:
+            await persist_message(session_id, "user", [MessagePart(text=message_text)])
+        except Exception as e:
+            print(f"[ChatService] Could not save user message: {e}")
 
     # Build the user Content object
     if request.message:
@@ -179,6 +217,7 @@ async def agent_chat(request: ChatRequest):
         )
 
     async def generate_agent():
+        full_response = ""
         try:
             async for event in runner.run_async(
                 user_id=user_id,
@@ -190,13 +229,17 @@ async def agent_chat(request: ChatRequest):
                     print(f"[ADK] event → {list(payload.keys())}")
                     yield json.dumps(payload) + "\n"
 
-                    # CRITICAL: If the model triggered a user-facing tool, we MUST stop the generator
-                    # so the Runner doesn't auto-proceed to the next turn (hallucinating/auto-running).
+                    if "text" in payload:
+                        full_response += payload["text"]
+
                     if "function_calls" in payload:
                         for fc in payload["function_calls"]:
                             if fc["name"] in ["request_form", "ask_choice_question", "save_section", "finalize_requirements"]:
                                 print(f"[ADK] Interrupting chain after {fc['name']} tool.")
-                                return # Terminate this specific request stream
+                                # Save partial response before stopping
+                                if full_response:
+                                    await persist_message(session_id, "assistant", [MessagePart(text=full_response)])
+                                return
 
         except Exception as exc:
             print(f"[ADK] Server Error: {exc}")
