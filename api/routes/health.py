@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
-from db.session import get_async_engine, get_database_url, is_async_database_url
+#from db.session import get_async_engine, get_database_url, get_engine, is_async_database_url
 
 
 router = APIRouter(prefix="/api/health", tags=["health"])

@@ -1,7 +1,7 @@
 
 from sqlalchemy import text
 
-from db.session import get_async_engine
+#from db.session import get_async_engine
 
 
 async def create_workspace() -> str:
