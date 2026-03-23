@@ -36,6 +36,8 @@ async def _create_issues_from_stories(stories: List[JiraStory]) -> JiraCreateIss
             key = await create_story_issue(
                 summary=story.summary,
                 description=story.description,
+                issue_type=story.issue_type,
+                labels=story.labels,
             )
             created.append(key)
         except JiraServiceError as exc:
@@ -73,12 +75,15 @@ You are an expert product manager and agile coach. Convert the provided SRS text
 Return ONLY a JSON array of objects. Each object MUST match this schema exactly:
 {
   "summary": "string",
-  "description": "string"
+  "description": "string",
+  "issue_type": "string | null",
+  "labels": ["string"]
 }
 
 Rules:
 - Return ONLY JSON (no markdown, no commentary).
 - Generate between 1 and 10 stories.
+ - "issue_type" and "labels" are optional; use null or [] if unknown.
 """
 
 
@@ -123,7 +128,14 @@ async def draft_issues_from_srs(srs: str = Body(..., media_type="text/plain")):
         stories = stories[:10]
 
         draft_stories: List[JiraDraftStory] = [
-            JiraDraftStory(id=str(uuid.uuid4()), summary=s.summary, description=s.description) for s in stories
+            JiraDraftStory(
+                id=str(uuid.uuid4()),
+                summary=s.summary,
+                description=s.description,
+                issue_type=s.issue_type,
+                labels=s.labels,
+            )
+            for s in stories
         ]
         return JiraDraftStoriesResponse(stories=draft_stories)
     except RuntimeError as exc:

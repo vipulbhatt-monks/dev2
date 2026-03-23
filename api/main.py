@@ -21,6 +21,7 @@ from routes.jira import router as jira_router
 from routes.figma_export import router as figma_router
 from routes.health import router as health_router
 from routes.workspaces import router as workspaces_router
+from routes.auth import router as auth_router
 
 
 
@@ -41,3 +42,4 @@ app.include_router(figma_router)
 app.include_router(jira_router)
 app.include_router(health_router)
 app.include_router(workspaces_router)
+app.include_router(auth_router)

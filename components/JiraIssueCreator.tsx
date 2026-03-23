@@ -64,7 +64,11 @@ const JiraIssueCreator: React.FC<JiraIssueCreatorProps> = ({ initialSrsText, onN
     setPublishOk(false);
 
     try {
-      await publishJiraStories(draft.slice(0, 10).map((s) => ({ summary: s.summary, description: s.description })));
+      await publishJiraStories(
+        draft
+          .slice(0, 10)
+          .map((s) => ({ summary: s.summary, description: s.description, issue_type: s.issue_type, labels: s.labels }))
+      );
       setPublishOk(true);
     } catch (e: any) {
       setError(e?.message || 'Failed to publish Jira issues');

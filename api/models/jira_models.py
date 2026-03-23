@@ -5,6 +5,8 @@ from typing import Any, List, Optional
 class JiraStory(BaseModel):
     summary: str
     description: str
+    issue_type: Optional[str] = None
+    labels: Optional[List[str]] = None
 
 
 class JiraDraftStory(JiraStory):

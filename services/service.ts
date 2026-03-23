@@ -15,6 +15,8 @@ export type JiraDraftStory = {
   id: string;
   summary: string;
   description: string;
+  issue_type?: string | null;
+  labels?: string[] | null;
 };
 
 export type JiraDraftStoriesResponse = {
@@ -22,7 +24,7 @@ export type JiraDraftStoriesResponse = {
 };
 
 export type JiraPublishStoriesRequest = {
-  stories: { summary: string; description: string }[];
+  stories: { summary: string; description: string; issue_type?: string | null; labels?: string[] | null }[];
 };
 
 export type JiraPublishOkResponse = {
@@ -50,7 +52,9 @@ export const generateJiraDraftFromSrs = async (srsText: string): Promise<JiraDra
   return data as JiraDraftStoriesResponse;
 };
 
-export const publishJiraStories = async (stories: { summary: string; description: string }[]): Promise<JiraPublishOkResponse> => {
+export const publishJiraStories = async (
+  stories: { summary: string; description: string; issue_type?: string | null; labels?: string[] | null }[]
+): Promise<JiraPublishOkResponse> => {
   const response = await fetch(`${API_BASE}/api/jira/issues/publish`, {
     method: 'POST',
     headers: {

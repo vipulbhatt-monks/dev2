@@ -44,7 +44,13 @@ def _to_adf(text: str) -> Dict[str, Any]:
     }
 
 
-async def create_story_issue(*, summary: str, description: str) -> str:
+async def create_story_issue(
+    *,
+    summary: str,
+    description: str,
+    issue_type: Optional[str] = None,
+    labels: Optional[list[str]] = None,
+) -> str:
     base_url = _require_env("JIRA_BASE_URL").rstrip("/")
     email = _require_env("JIRA_EMAIL")
     api_token = _require_env("JIRA_API_TOKEN")
@@ -55,8 +61,15 @@ async def create_story_issue(*, summary: str, description: str) -> str:
         "project": {"key": project_key},
         "summary": summary,
         "description": _to_adf(description),
-        "issuetype": {"id": "10004"},
     }
+
+    if issue_type:
+        fields["issuetype"] = {"name": issue_type}
+    else:
+        fields["issuetype"] = {"id": "10004"}
+
+    if labels:
+        fields["labels"] = labels
 
     payload: Dict[str, Any] = {"fields": fields}
 
